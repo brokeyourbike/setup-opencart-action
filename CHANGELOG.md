@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/brokeyourbike/setup-opencart-action/compare/v1.0.1...v1.0.2) (2026-05-02)
+
+
+### Bug Fixes
+
+* output ([b103ce9](https://github.com/brokeyourbike/setup-opencart-action/commit/b103ce9a0dc6b0fe9bf5ea6447eba1c1cfa35574))
+
 ## [1.0.1](https://github.com/brokeyourbike/setup-opencart-action/compare/v1.0.0...v1.0.1) (2026-05-02)
 
 
