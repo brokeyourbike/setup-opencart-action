@@ -27,7 +27,7 @@ jobs:
       - name: Setup OpenCart 4
         uses: brokeyourbike/setup-opencart-action@v1
         with:
-          oc-version: '4.0.2.3'
+          oc-version: '4.1.0.3'
           db-password: 'root_password'
 
       - name: Test
@@ -38,7 +38,7 @@ jobs:
 
 | Input | Description | Default |
 | :--- | :--- | :--- |
-| `oc-version` | Target OpenCart 4 version (e.g., 4.0.2.3) | `4.0.2.3` |
+| `oc-version` | Target OpenCart 4 version (e.g., 4.1.0.3) | `4.1.0.3` |
 | `db-hostname` | Database host (use 127.0.0.1 for host network) | `127.0.0.1` |
 | `db-username` | Database user | `root` |
 | `db-password` | **Required.** Database root password | — |
