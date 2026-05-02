@@ -7,12 +7,12 @@ branding:
 
 inputs:
   oc-version:
-    description: 'Version of OpenCart 4.x.x.x'
+    description: 'The OpenCart 4 version to install (e.g., 4.0.2.3)'
     required: true
     default: '4.0.2.3'
   db-hostname:
     description: 'Database host'
-    default: 'mysql'
+    default: '127.0.0.1'
   db-username:
     description: 'Database username'
     default: 'root'
@@ -29,17 +29,21 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Build and Run OpenCart
+    - name: Launch OpenCart Environment
       shell: bash
       run: |
-        # Build the image from the Dockerfile in the action's directory
-        docker build -t opencart-env ${{ github.action_path }}
+        # 1. Determine the image name based on input
+        IMAGE="ghcr.io/${{ github.repository_owner }}/setup-opencart:${{ inputs.oc-version }}"
 
-        # Run in detached mode (-d) and use host networking so localhost:8080 works
+        echo "🚀 Pulling pre-built image: $IMAGE"
+
+        # 2. Run the container in detached mode
+        # We use --network host so it can talk to the MySQL service on 127.0.0.1
         docker run -d \
           --name opencart-server \
           --network host \
-          opencart-env \
+          -e OC_VERSION="${{ inputs.oc-version }}" \
+          $IMAGE \
           "${{ inputs.oc-version }}" \
           "${{ inputs.db-hostname }}" \
           "${{ inputs.db-username }}" \
@@ -47,6 +51,14 @@ runs:
           "${{ inputs.db-port }}" \
           "${{ inputs.admin-password }}"
 
-        # Give it a moment to initialize the DB and start Apache
-        echo "Waiting for OpenCart to initialize..."
-        sleep 10
+        # 3. Wait for the internal installer to finish
+        echo "⏳ Waiting for OpenCart to initialize..."
+        
+        # Simple health check loop
+        timeout 60s bash -c 'until curl -s --head http://localhost:8080 | grep "200 OK"; do sleep 2; done' || {
+          echo "❌ Error: OpenCart failed to start within 60 seconds."
+          docker logs opencart-server
+          exit 1
+        }
+
+        echo "✅ OpenCart 4 is ready at http://localhost:8080"
