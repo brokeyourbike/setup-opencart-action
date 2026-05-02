@@ -1,0 +1,38 @@
+name: 'Setup OpenCart Environment'
+description: 'Spins up a fresh, fully-installed OpenCart 4 store'
+author: 'Ivan Stasiuk'
+branding:
+  icon: 'server'
+  color: 'blue'
+
+inputs:
+  oc-version:
+    description: 'Version of OpenCart 4.x.x.x'
+    required: true
+    default: '4.0.2.3'
+  db-hostname:
+    description: 'Database host'
+    default: 'mysql'
+  db-username:
+    description: 'Database username'
+    default: 'root'
+  db-password:
+    description: 'Database password'
+    required: true
+  db-port:
+    description: 'Database port'
+    default: '3306'
+  admin-password:
+    description: 'Password for the OpenCart admin user'
+    default: 'admin_pass'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.oc-version }}
+    - ${{ inputs.db-hostname }}
+    - ${{ inputs.db-username }}
+    - ${{ inputs.db-password }}
+    - ${{ inputs.db-port }}
+    - ${{ inputs.admin-password }}

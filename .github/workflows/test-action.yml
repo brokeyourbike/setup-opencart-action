@@ -1,0 +1,43 @@
+name: self-test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  verify-setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10 
+
+    services:
+      mysql:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: opencart
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Run Setup OpenCart Action
+        timeout-minutes: 5
+        uses: ./ 
+        with:
+          oc-version: '4.0.2.3'
+          db-hostname: 'mysql'
+          db-password: 'root_password'
+          admin-password: 'test_password123'
+
+      - name: Verify Web Service
+        run: |
+          # Wait for Apache to bind to the port
+          sleep 5
+          curl -s --head http://localhost:8080 | grep "200 OK" || (echo "Web server not responding" && exit 1)

@@ -1,2 +1,3 @@
 # setup-opencart-action
-Setup OpenCart 4.
+
+Spins up a fresh, fully-installed OpenCart 4 store.
