@@ -1,0 +1,64 @@
+name: 'Setup OpenCart Environment'
+description: 'Spins up a fresh, fully-installed OpenCart 4 store'
+author: 'Ivan Stasiuk'
+branding:
+  icon: 'server'
+  color: 'blue'
+
+inputs:
+  oc-version:
+    description: 'The OpenCart 4 version to install (e.g., 4.0.2.3)'
+    required: true
+    default: '4.0.2.3'
+  db-hostname:
+    description: 'Database host'
+    default: '127.0.0.1'
+  db-username:
+    description: 'Database username'
+    default: 'root'
+  db-password:
+    description: 'Database password'
+    required: true
+  db-port:
+    description: 'Database port'
+    default: '3306'
+  admin-password:
+    description: 'Password for the OpenCart admin user'
+    default: 'admin_pass'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Launch OpenCart Environment
+      shell: bash
+      run: |
+        # 1. Determine the image name based on input
+        IMAGE="ghcr.io/${{ github.repository_owner }}/setup-opencart:${{ inputs.oc-version }}"
+
+        echo "🚀 Pulling pre-built image: $IMAGE"
+
+        # 2. Run the container in detached mode
+        # We use --network host so it can talk to the MySQL service on 127.0.0.1
+        docker run -d \
+          --name opencart-server \
+          --network host \
+          -e OC_VERSION="${{ inputs.oc-version }}" \
+          $IMAGE \
+          "${{ inputs.oc-version }}" \
+          "${{ inputs.db-hostname }}" \
+          "${{ inputs.db-username }}" \
+          "${{ inputs.db-password }}" \
+          "${{ inputs.db-port }}" \
+          "${{ inputs.admin-password }}"
+
+        # 3. Wait for the internal installer to finish
+        echo "⏳ Waiting for OpenCart to initialize..."
+        
+        # Simple health check loop
+        timeout 60s bash -c 'until curl -s --head http://localhost:8080 | grep "200 OK"; do sleep 2; done' || {
+          echo "❌ Error: OpenCart failed to start within 60 seconds."
+          docker logs opencart-server
+          exit 1
+        }
+
+        echo "✅ OpenCart 4 is ready at http://localhost:8080"

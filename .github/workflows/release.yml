@@ -1,0 +1,41 @@
+name: release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*'] # Trigger on releases
+
+jobs:
+  build-versions:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # List all versions you want to provide as pre-built images
+        oc_version: [
+          '4.1.0.3',
+          '4.1.0.2',
+          '4.1.0.1',
+          '4.1.0.0',
+          '4.0.2.3',
+          '4.0.2.2',
+          '4.0.2.1',
+          '4.0.2.0',
+        ]
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          # We tag the image with the specific OpenCart version
+          tags: ghcr.io/${{ github.repository_owner }}/setup-opencart:${{ matrix.oc_version }}
+          build-args: |
+            OC_VERSION=${{ matrix.oc_version }}

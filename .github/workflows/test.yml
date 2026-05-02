@@ -1,0 +1,49 @@
+name: test
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-images:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        oc_version: ['4.1.0.3']
+
+    services:
+      mysql:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: opencart
+        ports:
+          - 3306:3306
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Build Local Test Image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          tags: setup-opencart:test-${{ matrix.oc_version }}
+          build-args: |
+            OC_VERSION=${{ matrix.oc_version }}
+
+      - name: Verify Setup Logic
+        shell: bash
+        run: |
+          docker run -d \
+            --name test-server \
+            --network host \
+            setup-opencart:test-${{ matrix.oc_version }} \
+            "${{ matrix.oc_version }}" "127.0.0.1" "root" "root_password" "3306" "admin_pass"
+
+          # Health check
+          timeout 60s bash -c 'until curl -s --head http://localhost:8080 | grep "200 OK"; do sleep 2; done' || (docker logs test-server && exit 1)
+
+      - name: Success
+        run: echo "Image for ${{ matrix.oc_version }} is verified!"
