@@ -25,6 +25,10 @@ inputs:
   admin-password:
     description: 'Password for the OpenCart admin user'
     default: 'admin_pass'
+outputs:
+  store-url:
+    description: "The base URL of the installed OpenCart store"
+    value: ${{ steps.set-url.outputs.store_url }}
 
 runs:
   using: "composite"
@@ -62,3 +66,9 @@ runs:
         }
 
         echo "✅ OpenCart ${{ inputs.oc-version }} is ready at http://localhost:8080"
+    - name: Set Store URL Output
+      id: set-url
+      shell: bash
+      run: |
+        # Assuming you use port 8080 by default, or you can use a dynamic variable here
+        echo "store_url=http://localhost:8080" >> $GITHUB_OUTPUT
