@@ -8,9 +8,12 @@ on:
 jobs:
   build-versions:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     strategy:
       matrix:
-        # List all versions you want to provide as pre-built images
         oc_version: [
           '4.1.0.3',
           '4.1.0.2',
