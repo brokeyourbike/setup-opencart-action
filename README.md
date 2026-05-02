@@ -25,7 +25,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Setup OpenCart 4
-        uses: stasiuk/setup-opencart@v1
+        uses: brokeyourbike/setup-opencart-action@v1
         with:
           oc-version: '4.0.2.3'
           db-password: 'root_password'

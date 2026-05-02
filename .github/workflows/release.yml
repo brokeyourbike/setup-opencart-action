@@ -2,8 +2,7 @@ name: release
 
 on:
   push:
-    branches: [main]
-    tags: ['v*'] # Trigger on releases
+    tags: ['v*']
 
 jobs:
   build-versions:
@@ -38,7 +37,6 @@ jobs:
         with:
           context: .
           push: true
-          # We tag the image with the specific OpenCart version
           tags: ghcr.io/${{ github.repository_owner }}/setup-opencart:${{ matrix.oc_version }}
           build-args: |
             OC_VERSION=${{ matrix.oc_version }}
