@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # 1. OS & Version Guards
 if [[ "$(uname -s)" != "Linux" ]]; then
@@ -18,10 +19,25 @@ fi
 
 echo "📦 Preparing OpenCart $VERSION..."
 
-# Download and Extract
 curl -LO "https://github.com/opencart/opencart/releases/download/${VERSION}/opencart-${VERSION}.zip"
-unzip -q "opencart-${VERSION}.zip" -d /tmp/oc
-mv /tmp/oc/upload/* /var/www/html/
+
+# Unzip to a temporary location
+unzip -q "opencart-${VERSION}.zip" -d /tmp/oc_source
+
+# Find the upload directory (handles the nested parent folder automatically)
+UPLOAD_DIR=$(find /tmp/oc_source -type d -name "upload" | head -n 1)
+
+if [ -z "$UPLOAD_DIR" ]; then
+    echo "❌ Error: Could not find 'upload' directory in ZIP."
+    exit 1
+fi
+
+# Move files to web root
+cp -r "$UPLOAD_DIR/." /var/www/html/
+echo "📂 Files moved to /var/www/html/"
+
+# Ensure admin directory exists before touching config
+mkdir -p /var/www/html/admin
 
 # Config & Permissions
 touch /var/www/html/config.php /var/www/html/admin/config.php
