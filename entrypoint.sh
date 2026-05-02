@@ -60,5 +60,7 @@ php /var/www/html/install/cli_install.php install \
 
 rm -rf /var/www/html/install
 
+echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
 echo "✅ OpenCart 4 Setup Complete!"
 apache2-foreground

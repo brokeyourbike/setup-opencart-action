@@ -36,8 +36,11 @@ jobs:
           db-password: 'root_password'
           admin-password: 'test_password123'
 
-      - name: Verify Web Service
+      - name: Verify Web Service is Up
         run: |
-          # Wait for Apache to bind to the port
-          sleep 5
-          curl -s --head http://localhost:8080 | grep "200 OK" || (echo "Web server not responding" && exit 1)
+          # The store is running in the background, so we can now run curls or Playwright
+          curl -s --head http://localhost:8080 | grep "200 OK"
+
+      - name: (Optional) Check Docker Logs if something failed
+        if: failure()
+        run: docker logs opencart-server

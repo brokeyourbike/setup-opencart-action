@@ -27,12 +27,26 @@ inputs:
     default: 'admin_pass'
 
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.oc-version }}
-    - ${{ inputs.db-hostname }}
-    - ${{ inputs.db-username }}
-    - ${{ inputs.db-password }}
-    - ${{ inputs.db-port }}
-    - ${{ inputs.admin-password }}
+  using: "composite"
+  steps:
+    - name: Build and Run OpenCart
+      shell: bash
+      run: |
+        # Build the image from the Dockerfile in the action's directory
+        docker build -t opencart-env ${{ github.action_path }}
+
+        # Run in detached mode (-d) and use host networking so localhost:8080 works
+        docker run -d \
+          --name opencart-server \
+          --network host \
+          opencart-env \
+          "${{ inputs.oc-version }}" \
+          "${{ inputs.db-hostname }}" \
+          "${{ inputs.db-username }}" \
+          "${{ inputs.db-password }}" \
+          "${{ inputs.db-port }}" \
+          "${{ inputs.admin-password }}"
+
+        # Give it a moment to initialize the DB and start Apache
+        echo "Waiting for OpenCart to initialize..."
+        sleep 10
