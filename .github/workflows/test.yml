@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        oc_version: ['4.0.2.3']
+        oc_version: ['4.1.0.3']
 
     services:
       mysql:
